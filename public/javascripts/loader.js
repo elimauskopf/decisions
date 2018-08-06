@@ -8,7 +8,8 @@ loader.add([
     "/images/Basic_Door_Pixel.png",
     "/images/wall.png",
     "/images/enemy.png",
-    "/images/spike.png"
+    "/images/spike.png",
+    "/images/blood.png"
 ])
 .on("progress", loadProgressHandler)
 .load(setup)
@@ -22,7 +23,7 @@ function loadProgressHandler(loader, resource) {
     console.log("progress: " + loader.progress + "%")
 }
 
-let char, welcomeScene, sceneIndex, doorOpen1, doorOpen2, doorClose1, doorClose2, f, enemyArr, id, decisionMade, wallOne;
+let char, welcomeScene, sceneIndex, doorOpen1, doorOpen2, doorClose1, doorClose2, f, enemyArr, id, decisionMade, wallOne, blood, ticker, dead, isDead = false;
 
 function setup(){
 
@@ -98,14 +99,16 @@ function setup(){
       });
 
     //SOUNDS
-    const footsteps = PIXI.sound.Sound.from('/sounds/running.mp3')
-    // PIXI.sound.Sound.from({
-    //     url: 'sounds/florist.mp3',
-    //     autoPlay: true,
-    //     complete: function() {
-    //         console.log('Sound finished');
-    //     }
-    // });
+    const footsteps = PIXI.sound.Sound.from('/sounds/running.mp3');
+    dead = PIXI.sound.Sound.from('/sounds/1.mp3');
+    PIXI.sound.Sound.from({
+        url: 'sounds/florist.mp3',
+        volume: 0.5,
+        autoPlay: true,
+        complete: function() {
+            console.log('Sound finished');
+        }
+    });
 
     //MESSAGES  
 
@@ -156,6 +159,12 @@ function setup(){
     faithMessage.x = 400;
     faithMessage.y = 50
     faithScene.addChild(faithMessage)
+
+    deadMessage = new Text("Just mabye not into a bed of spikes", style)
+    deadMessage.x = 400;
+    deadMessage.y = 50;
+    deadMessage.visible = false;
+    faithScene.addChild(deadMessage);
     
 
 
@@ -226,9 +235,17 @@ function setup(){
         faithScene.addChild(spike)
 
     }
+
+    //blood
+    blood = new Sprite(resources["/images/blood.png"].texture)
+    blood.height = 100;
+    blood.width = 100;
+    blood.visible = false;
+    faithScene.addChild(blood)
+
     
     //Enemies
-    let numberOfEnemies = 6,
+    let numberOfEnemies = 5,
       spacing = 200,
       xOffset = 20,
       speed = 4,
@@ -322,7 +339,7 @@ function setup(){
     left.press = () => {
         //change velocity 
         
-            char.vx = -15;
+            char.vx = -10;
             char.vy = 0;
 
         footsteps.play()
@@ -345,7 +362,7 @@ function setup(){
   //Right 
   right.press = () => {
       
-        char.vx = 5; 
+        char.vx = 10; 
         char.vy = 0;
         footsteps.play()
 
@@ -364,6 +381,9 @@ function setup(){
     //set state
     state = play;
 
+    ticker = new PIXI.ticker.Ticker()
+    
+
     //start game loop
     app.ticker.add(delta => gameLoop(delta));
 
@@ -380,7 +400,8 @@ function gameLoop(delta) {
    
     
     
-    
+   
+
     let charHitLeft = contain(char, {x: 0, y:0, width: app.width, height: app.height})
 
     //hit collision
@@ -393,7 +414,7 @@ function gameLoop(delta) {
 
             
             sceneArr[sceneIndex].visible = false;
-            sceneIndex+=10;
+            sceneIndex++;
         } else{ //scene 6 or 7
             sceneArr[sceneIndex].visible = false
             if (sceneIndex === 6){
@@ -423,6 +444,19 @@ function gameLoop(delta) {
         }
         
 
+    }
+
+    if (char.x >= 1400){
+        sceneArr[sceneIndex].visible = false;
+
+        if(sceneIndex === 7){
+            sceneIndex -=2;
+        } else {
+            sceneIndex--;
+        }
+        sceneArr[sceneIndex].visible = true
+        char.x = 100
+            char.y = 640
     }
 
     
@@ -475,9 +509,28 @@ function gameLoop(delta) {
         //FAITH SCENE
         if (sceneIndex === 10){
             if(char.x <980 && char.x >400){
-                char.vy = 12;
-                char.vx = -3;
+                if (char.y >= 620 && !isDead ){
+                    char.vx = 0;
+                    char.vy = 0;
+                    char.rotation = 1.3;
+                    blood.x = char.x -5;
+                    blood.y = char.y - 10;
+                    blood.rotation = .3
+
+                    //spawn despawn stff
+                    blood.visible = true
+                    faithMessage.visible = false
+                    deadMessage.visible = true;
+
+                    dead.play()
+                    isDead = true;
+                } else if(!isDead)  {
+                    char.vy = 12;
+                    char.vx = -3;
+                }
+                
             }
+
 
         }
        
