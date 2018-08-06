@@ -89,8 +89,15 @@ var app;
         //`hit` will be either `true` or `false`
         return hit;
       };
+
+      function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
       
-     
+      
+    //   const footsteps = new HTMLUnknownElement({
+    //     src: ['/sounds/running.mp3']
+    // })
 
     PIXI.utils.sayHello(type)
 
