@@ -339,7 +339,7 @@ function setup(){
     left.press = () => {
         //change velocity 
         
-            char.vx = -10;
+            char.vx = -7;
             char.vy = 0;
 
         footsteps.play()
@@ -362,7 +362,7 @@ function setup(){
   //Right 
   right.press = () => {
       
-        char.vx = 10; 
+        char.vx = 7; 
         char.vy = 0;
         footsteps.play()
 
